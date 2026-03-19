@@ -1,0 +1,65 @@
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: laogong_visa_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: laogong_visa
+      MYSQL_USER: laogong
+      MYSQL_PASSWORD: laogong123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - laogong_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Go 后端 API
+  backend:
+    build: ./backend
+    container_name: laogong_visa_backend
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=laogong
+      - DB_PASSWORD=laogong123
+      - DB_NAME=laogong_visa
+      - JWT_SECRET=laogong_visa_secret_key_2026
+      - GIN_MODE=release
+      - FRONTEND_URL=http://localhost:8080
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - laogong_network
+    restart: unless-stopped
+
+  # 统一前端 (管理后台 + 用户前台 Portal)
+  frontend-admin:
+    build: ./frontend-admin
+    container_name: laogong_visa_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - laogong_network
+    restart: unless-stopped
+
+networks:
+  laogong_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  uploads_data:
