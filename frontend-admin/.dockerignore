@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+packages/*/node_modules
+
+# Build outputs
+dist
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+.github
+CHANGELOG.md
+CHANGELOG.zh_CN.md
+README.md
+README.en_US.md
+LICENSE
